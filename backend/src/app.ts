@@ -2,10 +2,15 @@ import express, { Application } from "express";
 import healthRoutes from "./routes/health.routes";
 import taskRoutes from "./routes/task.routes";
 import { errorHandler } from "./middleware/errorHandler";
+import { requestLogger, attachStartTime } from "./middleware/logger";
 
 const app: Application = express();
 
-// Middleware
+// Request logging middleware (must be first to capture all requests)
+app.use(attachStartTime);
+app.use(requestLogger);
+
+// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

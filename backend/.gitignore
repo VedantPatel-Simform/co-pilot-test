@@ -11,6 +11,10 @@ dist/
 # TypeScript cache
 *.tsbuildinfo
 
+# Log files
+logs/
+*.log
+
 # Dependencies (handled by root .gitignore)
 # node_modules/
 # package-lock.json
