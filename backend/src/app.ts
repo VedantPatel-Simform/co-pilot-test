@@ -10,9 +10,9 @@ const app: Application = express();
 app.use(attachStartTime);
 app.use(requestLogger);
 
-// Body parsing middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parsing middleware with size limits (prevent DoS attacks)
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 // Routes
 app.use("/", healthRoutes);
