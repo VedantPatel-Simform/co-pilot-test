@@ -96,15 +96,13 @@ The AI acted as a technical advisor, code generator, and documentation writer, a
 
 <!-- Optional: Approximate time spent on each phase -->
 
-- Planning & Setup: 15 minutes
+- Planning & Setup: 10 minutes
 - Core Implementation (CRUD API): 30 minutes
-- Testing & Debugging: 10 minutes
-- Additional Requirements - Due Date & Priority: 20 minutes
-- Additional Requirements - Request Logging: 25 minutes
+- Additional Requirements - Due Date & Priority: 10 minutes
+- Additional Requirements - Request Logging: 15 minutes
 - Optional Challenge - Advanced Validation (Zod + Sanitization): 30 minutes
-- Documentation & Test Payloads: 20 minutes
 
-**Total Time:** ~2.5 hours
+**Total Time:** ~2 hours
 
 ## Optional Challenge
 
