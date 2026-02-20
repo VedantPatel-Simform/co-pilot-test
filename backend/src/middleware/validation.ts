@@ -35,7 +35,7 @@ export const validateCreateTask = (
   res: Response,
   next: NextFunction,
 ): void => {
-  const { title, description, status } = req.body;
+  const { title, description, status, dueDate } = req.body;
 
   // Validate title
   if (!title) {
@@ -74,6 +74,25 @@ export const validateCreateTask = (
     );
   }
 
+  // Validate dueDate if provided
+  if (dueDate !== undefined) {
+    if (typeof dueDate !== "string") {
+      throw new ValidationError("dueDate must be a valid ISO 8601 date string");
+    }
+
+    const dueDateObj = new Date(dueDate);
+    if (isNaN(dueDateObj.getTime())) {
+      throw new ValidationError("dueDate must be a valid date");
+    }
+
+    // Optional: Check if due date is not in the past
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Start of today
+    if (dueDateObj < now) {
+      throw new ValidationError("dueDate cannot be in the past");
+    }
+  }
+
   next();
 };
 
@@ -90,16 +109,17 @@ export const validateUpdateTask = (
   res: Response,
   next: NextFunction,
 ): void => {
-  const { title, description, status } = req.body;
+  const { title, description, status, dueDate } = req.body;
 
   // Check if at least one field is provided
   if (
     title === undefined &&
     description === undefined &&
-    status === undefined
+    status === undefined &&
+    dueDate === undefined
   ) {
     throw new ValidationError(
-      "At least one field (title, description, or status) must be provided for update",
+      "At least one field (title, description, status, or dueDate) must be provided for update",
     );
   }
 
@@ -135,6 +155,30 @@ export const validateUpdateTask = (
       throw new ValidationError(
         `Invalid status. Must be one of: ${Object.values(TaskStatus).join(", ")}`,
       );
+    }
+  }
+
+  // Validate dueDate if provided
+  if (dueDate !== undefined) {
+    // Allow null to clear due date
+    if (dueDate === null) {
+      // Valid - clearing due date
+    } else if (typeof dueDate !== "string") {
+      throw new ValidationError(
+        "dueDate must be a valid ISO 8601 date string or null",
+      );
+    } else {
+      const dueDateObj = new Date(dueDate);
+      if (isNaN(dueDateObj.getTime())) {
+        throw new ValidationError("dueDate must be a valid date");
+      }
+
+      // Optional: Check if due date is not in the past
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      if (dueDateObj < now) {
+        throw new ValidationError("dueDate cannot be in the past");
+      }
     }
   }
 

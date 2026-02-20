@@ -17,9 +17,29 @@ export interface Task {
   title: string;
   description?: string;
   status: TaskStatus;
+  dueDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Helper function to check if a task is high priority
+ * A task is high priority if its due date is within 7 days from now
+ * @param task - The task to check
+ * @returns true if high priority, false otherwise
+ */
+export const isHighPriority = (task: Task): boolean => {
+  if (!task.dueDate) {
+    return false; // No due date = not high priority
+  }
+
+  const now = new Date();
+  const dueDate = new Date(task.dueDate);
+  const diffInMs = dueDate.getTime() - now.getTime();
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+  return diffInDays <= 7 && diffInDays >= 0; // Within 7 days and not past due
+};
 
 /**
  * In-memory task storage
@@ -36,6 +56,7 @@ export const createTask = (taskData: {
   title: string;
   description?: string;
   status: TaskStatus;
+  dueDate?: Date | string;
 }): Task => {
   const now = new Date();
   const newTask: Task = {
@@ -43,6 +64,7 @@ export const createTask = (taskData: {
     title: taskData.title,
     description: taskData.description,
     status: taskData.status,
+    dueDate: taskData.dueDate ? new Date(taskData.dueDate) : undefined,
     createdAt: now,
     updatedAt: now,
   };
@@ -51,15 +73,41 @@ export const createTask = (taskData: {
 };
 
 /**
- * Get all tasks, optionally filtered by status
+ * Get all tasks, optionally filtered by status and sorted by priority
  * @param status - Optional status filter
+ * @param sortByPriority - Optional flag to sort by high priority
  * @returns Array of tasks
  */
-export const findAllTasks = (status?: TaskStatus): Task[] => {
-  if (status) {
-    return tasks.filter((task) => task.status === status);
+export const findAllTasks = (
+  status?: TaskStatus,
+  sortByPriority?: boolean,
+): Task[] => {
+  let result = status
+    ? tasks.filter((task) => task.status === status)
+    : [...tasks];
+
+  // Sort by priority if requested
+  if (sortByPriority) {
+    result.sort((a, b) => {
+      const aPriority = isHighPriority(a);
+      const bPriority = isHighPriority(b);
+
+      // High priority tasks come first
+      if (aPriority && !bPriority) return -1;
+      if (!aPriority && bPriority) return 1;
+
+      // If both are high/low priority, sort by due date
+      if (a.dueDate && b.dueDate) {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      if (a.dueDate) return -1; // Tasks with due dates come before those without
+      if (b.dueDate) return 1;
+
+      return 0; // Keep original order
+    });
   }
-  return [...tasks];
+
+  return result;
 };
 
 /**
@@ -83,6 +131,7 @@ export const updateTask = (
     title?: string;
     description?: string;
     status?: TaskStatus;
+    dueDate?: Date | string | null;
   },
 ): Task | undefined => {
   const taskIndex = tasks.findIndex((task) => task.id === id);
@@ -90,9 +139,26 @@ export const updateTask = (
     return undefined;
   }
 
+  // Handle dueDate update
+  let processedDueDate: Date | undefined = tasks[taskIndex].dueDate;
+  if ("dueDate" in updates) {
+    if (updates.dueDate === null) {
+      processedDueDate = undefined; // Clear due date
+    } else if (updates.dueDate) {
+      processedDueDate = new Date(updates.dueDate);
+    }
+  }
+
   const updatedTask: Task = {
     ...tasks[taskIndex],
-    ...updates,
+    title: updates.title !== undefined ? updates.title : tasks[taskIndex].title,
+    description:
+      updates.description !== undefined
+        ? updates.description
+        : tasks[taskIndex].description,
+    status:
+      updates.status !== undefined ? updates.status : tasks[taskIndex].status,
+    dueDate: processedDueDate,
     updatedAt: new Date(),
   };
   tasks[taskIndex] = updatedTask;

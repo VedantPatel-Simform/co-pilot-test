@@ -6,6 +6,7 @@ import {
   updateTask as updateTaskModel,
   deleteTask as deleteTaskModel,
   TaskStatus,
+  isHighPriority,
 } from "../models/task.model";
 
 /**
@@ -14,24 +15,28 @@ import {
  * @returns 201 with created task
  */
 export const createTask = (req: Request, res: Response): void => {
-  const { title, description, status } = req.body;
+  const { title, description, status, dueDate } = req.body;
 
   const newTask = createTaskModel({
     title,
     description,
     status: status as TaskStatus,
+    dueDate,
   });
 
   res.status(201).json(newTask);
 };
 
 /**
- * Get all tasks with optional status filter
- * @route GET /api/tasks?status=pending|in_progress|completed
+ * Get all tasks with optional status filter and priority sorting
+ * @route GET /api/tasks?status=pending|in_progress|completed&sortByPriority=true
  * @returns 200 with array of tasks
  */
 export const getAllTasks = (req: Request, res: Response): void => {
-  const { status } = req.query;
+  const { status, sortByPriority } = req.query;
+
+  // Parse sortByPriority query parameter
+  const shouldSortByPriority = sortByPriority === "true";
 
   // Validate status query parameter if provided
   if (status) {
@@ -42,12 +47,12 @@ export const getAllTasks = (req: Request, res: Response): void => {
       });
       return;
     }
-    const tasks = findAllTasks(statusStr as TaskStatus);
+    const tasks = findAllTasks(statusStr as TaskStatus, shouldSortByPriority);
     res.status(200).json(tasks);
     return;
   }
 
-  const tasks = findAllTasks();
+  const tasks = findAllTasks(undefined, shouldSortByPriority);
   res.status(200).json(tasks);
 };
 
@@ -88,12 +93,13 @@ export const updateTask = (req: Request, res: Response): void => {
     return;
   }
 
-  const { title, description, status } = req.body;
+  const { title, description, status, dueDate } = req.body;
 
   const updatedTask = updateTaskModel(id, {
     title,
     description,
     status: status as TaskStatus | undefined,
+    dueDate,
   });
 
   if (!updatedTask) {
