@@ -192,11 +192,25 @@ The AI acted as a technical advisor, code generator, and documentation writer, a
 
 <!-- Verify before submitting -->
 
-- [ ] Code pushed to public GitHub repository
+- [x] Code pushed to public GitHub repository
 - [x] All mandatory requirements completed
 - [x] Code is tested and functional
 - [x] README updated (if needed)
 - [x] This SUBMISSION.md file completed
-- [ ] MS Teams recording completed and shared
-- [ ] GitHub repository URL provided to RM
-- [ ] MS Teams recording link provided to RM
+- [x] MS Teams recording completed and shared
+- [x] GitHub repository URL provided to RM
+- [x] MS Teams recording link provided to RM
+
+## Additional Challenge
+
+### Q : if a task is marked as done, should it be editable or not
+
+if not how will you enforce it
+
+### A : Allow Status Change Only
+
+Why?
+Users can fix mistakes (accidentally marked as complete)
+Prevents accidental modification of historical data
+Good balance between usability and data integrity
+Clear error messages guide users
