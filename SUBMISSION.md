@@ -102,7 +102,7 @@ The AI acted as a technical advisor, code generator, and documentation writer, a
 - Additional Requirements - Request Logging: 15 minutes
 - Optional Challenge - Advanced Validation (Zod + Sanitization): 30 minutes
 
-**Total Time:** ~2 hours
+**Total Time:** ~1.5 hours
 
 ## Optional Challenge
 
